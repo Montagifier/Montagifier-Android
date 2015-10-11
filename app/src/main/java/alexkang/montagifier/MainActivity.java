@@ -11,8 +11,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
@@ -25,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private Controller mController;
     private FloatingActionsMenu mFabMenu;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mProgressBar = (ProgressBar) findViewById(R.id.progress);
+
         if (getIntent().getAction().equals(Intent.ACTION_SEND)) {
             openVideoDialog(getIntent().getStringExtra(Intent.EXTRA_TEXT));
         }
@@ -80,11 +86,46 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
+        refresh();
+        mController.checkIn();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mController.checkOut();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        if (item.getItemId() == R.id.action_refresh) {
+            refresh();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void refresh() {
+        mProgressBar.setVisibility(View.VISIBLE);
         mController = Controller.getInstance();
         mController.getSounds(new Callback() {
             @Override
             @SuppressWarnings("unchecked")
             public void onDataRetrieved(Object data) {
+                mProgressBar.setVisibility(View.GONE);
+
                 if (data != null) {
                     ArrayList<SoundCategory> categories = (ArrayList<SoundCategory>) data;
                     Collections.sort(categories, new Comparator<SoundCategory>() {
@@ -97,14 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        mController.checkIn();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        mController.checkOut();
     }
 
     private void openVideoDialog(String url) {

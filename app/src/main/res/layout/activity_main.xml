@@ -69,4 +69,11 @@
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="?android:attr/progressBarStyleLarge" />
+
 </android.support.design.widget.CoordinatorLayout>
