@@ -94,7 +94,11 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
 
-        mController.checkOut();
+        try {
+            mController.checkOut();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
