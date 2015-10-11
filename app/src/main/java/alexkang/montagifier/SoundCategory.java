@@ -1,4 +1,4 @@
-package alexkang.videojerk;
+package alexkang.montagifier;
 
 import java.util.ArrayList;
 

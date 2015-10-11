@@ -1,4 +1,4 @@
-package alexkang.videojerk;
+package alexkang.montagifier;
 
 import org.junit.Test;
 

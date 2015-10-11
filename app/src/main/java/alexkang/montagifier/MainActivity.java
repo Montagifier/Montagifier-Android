@@ -1,4 +1,4 @@
-package alexkang.videojerk;
+package alexkang.montagifier;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        mController = Controller.getInstance(this);
+        mController = Controller.getInstance();
         mController.getSounds(new Callback() {
             @Override
             @SuppressWarnings("unchecked")
@@ -106,6 +106,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        mController.checkIn();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mController.checkOut();
     }
 
     private class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -115,35 +123,12 @@ public class MainActivity extends AppCompatActivity {
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
             sections = new ArrayList<>();
-
-            SoundCategory category;
-            ArrayList<String> sounds;
-
-            sounds = new ArrayList<>();
-            sounds.add("Weed");
-            sounds.add("Airhorn");
-            sounds.add("Ayy");
-            sounds.add("Lmao");
-            sounds.add("Hitmarker");
-            sounds.add("Intervention");
-            category = new SoundCategory("Montage", sounds);
-            sections.add(category);
-
-            sounds = new ArrayList<>();
-            sounds.add("Boot");
-            sounds.add("Shutdown");
-            sounds.add("Error");
-            sounds.add("Bloop");
-            sounds.add("420");
-            sounds.add("VHS");
-            sounds.add("Elevator");
-            category = new SoundCategory("Vapor", sounds);
-            sections.add(category);
         }
 
         @Override
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
+            bundle.putString("category", sections.get(position).name);
             bundle.putSerializable("sounds", sections.get(position).sounds);
 
             BoardFragment fragment = new BoardFragment();
