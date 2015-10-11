@@ -171,19 +171,9 @@ public class Controller {
     }
 
     public void requestVideo(String url, final Callback callback) {
-        int startIndex = url.lastIndexOf("youtube.com/");
+        final String id = extractVideoId(url);
 
-        if (startIndex == -1) {
-            startIndex = url.lastIndexOf("youtu.be/");
-            if (startIndex != -1) {
-                startIndex += 9;
-            }
-        } else {
-            startIndex += 12;
-        }
-
-        if (startIndex != -1) {
-            final String videoId = url.substring(startIndex, url.length());
+        if (id != null) {
             new AsyncTask<Void, Void, Integer>() {
 
                 @Override
@@ -194,7 +184,7 @@ public class Controller {
                         urlConnection.setRequestMethod("POST");
 
                         OutputStream out = urlConnection.getOutputStream();
-                        out.write(("video:" + videoId).getBytes());
+                        out.write(("video:" + id).getBytes());
                         out.flush();
                         out.close();
 
@@ -246,6 +236,25 @@ public class Controller {
             }
 
         }.start();
+    }
+
+    private String extractVideoId(String url) {
+        int startIndex = url.indexOf("youtube.com/");
+
+        if (startIndex == -1) {
+            startIndex = url.indexOf("youtu.be/");
+            if (startIndex != -1) {
+                startIndex += 9;
+            }
+        } else {
+            startIndex += 12;
+        }
+
+        if (startIndex != -1) {
+            return url.substring(startIndex, url.length());
+        } else {
+            return null;
+        }
     }
 
 }

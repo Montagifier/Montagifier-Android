@@ -2,6 +2,7 @@ package alexkang.montagifier;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -16,11 +17,14 @@ import android.widget.EditText;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private Controller mController;
+    private FloatingActionsMenu mFabMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,38 +42,14 @@ public class MainActivity extends AppCompatActivity {
         ViewPager viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(mSectionsPagerAdapter);
 
-        final FloatingActionsMenu fabMenu = (FloatingActionsMenu) findViewById(R.id.actions);
+        mFabMenu = (FloatingActionsMenu) findViewById(R.id.actions);
         View fabAddVideo = findViewById(R.id.add_video);
         View fabSkipVideo = findViewById(R.id.skip_video);
 
         fabAddVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                final EditText text = new EditText(MainActivity.this);
-
-                builder.setMessage("Enter your YouTube URL");
-                builder.setView(text);
-                builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mController.requestVideo(text.getText().toString(), new Callback() {
-                            @Override
-                            public void onDataRetrieved(Object data) {
-                                if (data != null) {
-                                    Snackbar.make(fabMenu, "Video added to queue.", Snackbar.LENGTH_SHORT).show();
-                                } else {
-                                    Snackbar.make(fabMenu, "Incorrect format.", Snackbar.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-
-                        fabMenu.collapse();
-                    }
-                });
-                builder.setNegativeButton("Cancel", null);
-
-                builder.show();
+                openVideoDialog(null);
             }
         });
 
@@ -80,16 +60,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDataRetrieved(Object data) {
                         if (data != null) {
-                            Snackbar.make(fabMenu, "Skip requested.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(mFabMenu, "Skip requested.", Snackbar.LENGTH_SHORT).show();
                         } else {
-                            Snackbar.make(fabMenu, "An error occurred, please try again later.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(mFabMenu, "An error occurred, please try again later.", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
 
-                fabMenu.collapse();
+                mFabMenu.collapse();
             }
         });
+
+        if (getIntent().getAction().equals(Intent.ACTION_SEND)) {
+            openVideoDialog(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+        }
     }
 
     @Override
@@ -102,7 +86,14 @@ public class MainActivity extends AppCompatActivity {
             @SuppressWarnings("unchecked")
             public void onDataRetrieved(Object data) {
                 if (data != null) {
-                    mSectionsPagerAdapter.setSections((ArrayList<SoundCategory>) data);
+                    ArrayList<SoundCategory> categories = (ArrayList<SoundCategory>) data;
+                    Collections.sort(categories, new Comparator<SoundCategory>() {
+                        @Override
+                        public int compare(SoundCategory lhs, SoundCategory rhs) {
+                            return lhs.name.compareTo(rhs.name);
+                        }
+                    });
+                    mSectionsPagerAdapter.setSections(categories);
                 }
             }
         });
@@ -114,6 +105,38 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
 
         mController.checkOut();
+    }
+
+    private void openVideoDialog(String url) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        final EditText text = new EditText(MainActivity.this);
+
+        if (url != null) {
+            text.setText(url);
+        }
+
+        builder.setMessage("Enter your YouTube URL");
+        builder.setView(text);
+        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mController.requestVideo(text.getText().toString(), new Callback() {
+                    @Override
+                    public void onDataRetrieved(Object data) {
+                        if (data != null) {
+                            Snackbar.make(mFabMenu, "Video added to queue.", Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            Snackbar.make(mFabMenu, "An error occurred, please try again later.", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                mFabMenu.collapse();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+
+        builder.show();
     }
 
     private class SectionsPagerAdapter extends FragmentPagerAdapter {
