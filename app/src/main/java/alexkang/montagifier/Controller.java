@@ -14,7 +14,7 @@ import java.util.Iterator;
 
 public class Controller {
 
-    private static final String URL_STRING = "http://10.0.1.15:5000";
+    private static final String URL_STRING = "http://montagifier.henryz.me";
 
     private static Controller instance;
 
@@ -44,7 +44,7 @@ public class Controller {
                     urlConnection.getResponseCode();
                     urlConnection.disconnect();
                 } catch (Exception e) {
-                    // Do nothing
+                    e.printStackTrace();
                 }
             }
 
@@ -69,7 +69,7 @@ public class Controller {
                     urlConnection.getResponseCode();
                     urlConnection.disconnect();
                 } catch (Exception e) {
-                    // Do nothing
+                    e.printStackTrace();
                 }
             }
 
@@ -120,6 +120,7 @@ public class Controller {
 
                     return result;
                 } catch (Exception e) {
+                    e.printStackTrace();
                     return null;
                 }
             }
@@ -152,6 +153,7 @@ public class Controller {
 
                     return response;
                 } catch (Exception e) {
+                    e.printStackTrace();
                     return null;
                 }
             }
@@ -201,6 +203,7 @@ public class Controller {
 
                         return response;
                     } catch (Exception e) {
+                        e.printStackTrace();
                         return null;
                     }
                 }
@@ -238,7 +241,7 @@ public class Controller {
                     urlConnection.getResponseCode();
                     urlConnection.disconnect();
                 } catch (Exception e) {
-                    // Do nothing
+                    e.printStackTrace();
                 }
             }
 
