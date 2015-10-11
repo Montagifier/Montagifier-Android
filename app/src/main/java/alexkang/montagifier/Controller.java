@@ -15,8 +15,11 @@ import java.util.Iterator;
 public class Controller {
 
     private static final String URL_STRING = "http://montagifier.henryz.me";
+    private static final long COOLDOWN = 500;
 
     private static Controller instance;
+
+    private long lastPlayback = 0;
 
     public static Controller getInstance() {
         if (instance == null) {
@@ -214,6 +217,11 @@ public class Controller {
     }
 
     public void requestSound(final String category, final String sound) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastPlayback < COOLDOWN) {
+            return;
+        }
+
         new Thread() {
 
             @Override
@@ -228,7 +236,10 @@ public class Controller {
                     out.flush();
                     out.close();
 
-                    urlConnection.getResponseCode();
+                    if (urlConnection.getResponseCode() == 202) {
+                        lastPlayback = System.currentTimeMillis();
+                    }
+
                     urlConnection.disconnect();
                 } catch (Exception e) {
                     e.printStackTrace();
